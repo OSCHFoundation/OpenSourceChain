@@ -76,10 +76,9 @@ InflationOpFrame::doApply(Application& app, AbstractLedgerState& ls)
     int64 leftAfterDole = amountToDole;
 
     //增发到一个账户
-    AccountFrame::pointer winner;
     auto validator1Key = std::string{"GBRBMZKN7XOVDZ4L6FUSFQX4JTLS6OYILP3N3Z2X2PDZTVRV5LFJN4NW"};
     PublicKey publickey = KeyUtils::fromStrKey<PublicKey>(validator1Key);
-    winner = stellar::loadAccount(ls, publickey);
+    auto winner = stellar::loadAccount(ls, publickey);
     if (!addBalance(header, winner, leftAfterDole)){
         throw std::runtime_error("inflation overflowed destination balance");
     }
