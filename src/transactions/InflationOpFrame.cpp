@@ -13,7 +13,7 @@
 #include "overlay/StellarXDR.h"
 #include "transactions/TransactionUtils.h"
 
-const uint32_t INFLATION_FREQUENCY = (60 * 60 * 24 * 7); // every 7 days
+const uint32_t INFLATION_FREQUENCY = (60 * 60 * 24 * 1); // every 7 days
 // inflation is .000190721 per 7 days, or 1% a year
 const int64_t INFLATION_RATE_TRILLIONTHS = 190721000LL;
 const int64_t TRILLION = 1000000000000LL;
@@ -64,7 +64,7 @@ InflationOpFrame::doApply(Application& app, AbstractLedgerState& ls)
 
     auto inflationAmount = bigDivide(lh.totalCoins, INFLATION_RATE_TRILLIONTHS,
                                      TRILLION, ROUND_DOWN);
-    auto amountToDole = inflationAmount + lh.feePool;
+    auto amountToDole =  lh.feePool;
 
     lh.feePool = 0;
     lh.inflationSeq++;
@@ -75,6 +75,16 @@ InflationOpFrame::doApply(Application& app, AbstractLedgerState& ls)
 
     int64 leftAfterDole = amountToDole;
 
+    //增发到一个账户
+    AccountFrame::pointer winner;
+    auto validator1Key = std::string{"GBRBMZKN7XOVDZ4L6FUSFQX4JTLS6OYILP3N3Z2X2PDZTVRV5LFJN4NW"};
+    PublicKey publickey = KeyUtils::fromStrKey<PublicKey>(validator1Key);
+    winner = AccountFrame::loadAccount(inflationDelta,publickey, db);
+    winner->addBalance(leftAfterDole);
+    winner->storeChange(inflationDelta, db);
+    payouts.emplace_back(publickey, leftAfterDole);
+
+    /*
     for (auto const& w : winners)
     {
         int64_t toDoleThisWinner =
@@ -117,7 +127,7 @@ InflationOpFrame::doApply(Application& app, AbstractLedgerState& ls)
     {
         lh.totalCoins += inflationAmount;
     }
-
+    */
     app.getMetrics()
         .NewMeter({"op-inflation", "success", "apply"}, "operation")
         .Mark();
