@@ -76,7 +76,7 @@ InflationOpFrame::doApply(Application& app, AbstractLedgerState& ls)
     int64 leftAfterDole = amountToDole;
 
     //增发到一个账户
-    auto validator1Key = std::string{"GBRBMZKN7XOVDZ4L6FUSFQX4JTLS6OYILP3N3Z2X2PDZTVRV5LFJN4NW"};
+    auto validator1Key = std::string{"GDVTLUX2H7IFGD4OSYEXDF4R4BUU5M56IFBVPQCCSNPNDQB2DOHC5YP2"};
     PublicKey publickey = KeyUtils::fromStrKey<PublicKey>(validator1Key);
     auto winner = stellar::loadAccount(ls, publickey);
     if (!addBalance(header, winner, leftAfterDole)){
