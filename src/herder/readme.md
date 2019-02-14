@@ -11,10 +11,7 @@ numbers"方式运作构成OSCH词汇，它是[SCPDriver class](../scp/SCPDriver.
 Header充当SCP和LedgerManager之间粘合剂
 
 ## 与LedgerManager交互
-
-Herder serializes "slot externalize" events as much as possible so that
-LedgerManager only sees strictly monotonic ledger closing events (and deal with
- any potential gaps using catchup).
+Herder尽可能地序列化“slot externalize”事件，以便LedgerManager只能看到严格单调的分类帐关闭事件（并使用追赶来处理任何潜在的间隙）。
 
 ## 与SCP交互
 Herder有两个主要的操作状态
@@ -24,22 +21,13 @@ Herder知道哪个一个插槽是最后序列化的，只处理下一个插槽�
 当接受到未来的SCP消息存储起来供以后使用：接收未来消息不一定表示存在问题。
 当其他对等设备继续运行时，网络可能已延迟当前插槽的消息。
 
-#### Timeout
-Herder places a timeout to make progress on the expected next slot, if it
- reaches this timeout, it changes its state to "Not tracking".
+#### 超时（Timeout）
+Herder设置超时以在预期的下一个插槽上取得进展，如果达到此超时，则将其状态更改为“Not Tracking”。
 
-#### Picking the initial position
-When a ledger is closed and LedgerManager is in sync, herder is responsible
- for picking a starting position to send a PREPARING message.
+#### 挑选一个初始位置
+当一个ledger被关闭，LedgerManager是处在同步过程，herder负责挑选一个起始位置发送PREPARING消息。
 
 ### "Not Tracking"状态
-Herder does not know which slot got externalized last, its goal is to go back
- to the tracking state.
-In order to do this, it starts processing all SCP messages starting with the
- smallest slot number, maximizing the chances that one of the slots actually
- externalizes.
+Herder不知道哪个slot是最后外部化的，这是header目标是返回tracking状态。为了做到这一点，它开始处理从最小的插槽号开始的所有SCP消息，最大化其中一个插槽实际外部化的机会。
 
-Note that moving to this state does not necessarily mean that the
- LedgerManager would move out of sync: it could just be that it takes an
- abnormal time (network outage of some sort, partitioning, etc) for nodes to
- reach consensus.
+请注意，转移到此状态并不一定意味着LedgerManager将不同步：它可能只是需要一个异常时间（某种网络中断，分区等）以使节点达成共识。
