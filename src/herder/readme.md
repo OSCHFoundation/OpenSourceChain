@@ -1,53 +1,33 @@
-# Herder
+# 牧羊人模块
 
-The [HerderSCPDriver](HerderSCPDriver.h) is a concrete implementation of the [SCP
-protocol](../scp), operating in terms of the "transaction sets" and "ledger
-numbers" that constitute the Stellar vocabulary. It is implemented as a subclass
-of the [SCPDriver class](../scp/SCPDriver.h), and so is most easily understood after
-reading that class and understanding where and how a subclass would make the abstract
-SCP protocol concrete.
+[HerderSCPDriver](HerderSCPDriver.h)是[SCP
+protocol](../scp)的具体实现,  以"transaction sets"和"ledger
+numbers"方式运作构成OSCH词汇，它是[SCPDriver class](../scp/SCPDriver.h)的一个子类, 因此阅读这个类，并理解每一个子类作用和所在位置，将理解SCP协议的具体化实现。 
 
-# key implementation details
+# 关键实现细节  
 
-The Herder considers a ledger number to be a "slot" in the SCP
-protocol, and transaction set hashes (along with close-time and base-fee) to be
-the sort of "value" that it is attempting to agree on for each "slot".
+牧羊人模块指定一个账本号（ledger number）为一个插槽（slot）在SCP协议中，交易集哈希（以及关闭时间和基本费用）是它试图就每个'slot'达成的值。
 
-Herder acts as the glue between SCP and LedgerManager.
+Header充当SCP和LedgerManager之间粘合剂
 
-## LedgerManager interaction
-Herder serializes "slot externalize" events as much as possible so that
-LedgerManager only sees strictly monotonic ledger closing events (and deal with
- any potential gaps using catchup).
+## 与LedgerManager交互
+Herder尽可能地序列化“slot externalize”事件，以便LedgerManager只能看到严格单调的分类帐关闭事件（并使用追赶来处理任何潜在的间隙）。
 
-## SCP interaction
-Herder has two main modes of operation.
+## 与SCP交互
+Herder有两个主要的操作状态
 
-### "Tracking" state
-Herder knows which slot got externalized last and only processes SCP messages
- for the next slot.
+### "Tracking"状态
+Herder知道哪个一个插槽是最后序列化的，只处理下一个插槽的SCP消息。
+当接受到未来的SCP消息存储起来供以后使用：接收未来消息不一定表示存在问题。
+当其他对等设备继续运行时，网络可能已延迟当前插槽的消息。
 
-SCP messages received for future slots are stored for later use: receiving
- future messages is not necessarily an indication of a problem.
-Messages for the current slot may have been delayed by the network while
- other peers moved on.
+#### 超时（Timeout）
+Herder设置超时以在预期的下一个插槽上取得进展，如果达到此超时，则将其状态更改为“Not Tracking”。
 
-#### Timeout
-Herder places a timeout to make progress on the expected next slot, if it
- reaches this timeout, it changes its state to "Not tracking".
+#### 挑选一个初始位置
+当一个ledger被关闭，LedgerManager是处在同步过程，herder负责挑选一个起始位置发送PREPARING消息。
 
-#### Picking the initial position
-When a ledger is closed and LedgerManager is in sync, herder is responsible
- for picking a starting position to send a PREPARING message.
+### "Not Tracking"状态
+Herder不知道哪个slot是最后外部化的，这是header目标是返回tracking状态。为了做到这一点，它开始处理从最小的插槽号开始的所有SCP消息，最大化其中一个插槽实际外部化的机会。
 
-### "Not Tracking" state
-Herder does not know which slot got externalized last, its goal is to go back
- to the tracking state.
-In order to do this, it starts processing all SCP messages starting with the
- smallest slot number, maximizing the chances that one of the slots actually
- externalizes.
-
-Note that moving to this state does not necessarily mean that the
- LedgerManager would move out of sync: it could just be that it takes an
- abnormal time (network outage of some sort, partitioning, etc) for nodes to
- reach consensus.
+请注意，转移到此状态并不一定意味着LedgerManager将不同步：它可能只是需要一个异常时间（某种网络中断，分区等）以使节点达成共识。
