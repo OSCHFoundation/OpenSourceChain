@@ -4,6 +4,7 @@
 # OpenSourceChain
 
 # Documentation
+[doc](https://github.com/OSCHFoundation/wiki)
 
 # Installation
 
