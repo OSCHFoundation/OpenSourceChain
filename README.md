@@ -1,8 +1,7 @@
-[![Build Status](https://travis-ci.org/stellar/stellar-core.svg?branch=auto)](https://travis-ci.org/stellar/stellar-core)
-
-
-# OpenSourceChain
-
+# OpenSourceChain  
+宗旨：电子及IT领域的公链，把区块链变成自来水一样的标准IT服务  
+性质：为线上社区和线下商业提供支付，记账，智能合约的平台，基于这个零信任不可篡改的公共平台，可以支持创建全新的商业模式  
+可实现的功能：移动钱包，智能付款方式以及可以想到的任何交易方式。Oschain底层一个复杂的分布式系统，但应用起来是十分容易  
 ## Documentation
 [文档列表](https://github.com/OSCHFoundation/wiki)  
 [事物](https://github.com/OSCHFoundation/wiki/blob/master/%E4%BA%8B%E5%8A%A1transaction.md)  
